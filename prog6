@@ -1,0 +1,87 @@
+// 1. Create (Insert)
+
+// Insert a single document
+db.students.insertOne({
+  name: "Akarsh",
+  age: 30,
+  cgpa: 9.0
+});
+
+// Insert multiple documents at once
+db.students.insertMany([
+  { name: "Ajith", age: 30, cgpa: 8.0 },
+  { name: "Anush", age: 30, cgpa: 8.5 },
+  { name: "Ananya", age: 30, cgpa: 9.0, fullTime: false, registerDate: new Date(), graduationDate: null, courses: ["Cloud", "BigData", "Cyber"], address: { houseNo: 123, city: "Mlr", zip: 575007 } }
+]);
+
+// 2. Read (Find)
+
+// Retrieve all documents
+print("All students:");
+db.students.find().forEach(printjson);
+
+// Retrieve documents where age is greater than 30
+print("\nStudents with age > 30:");
+db.students.find({ age: { $gt: 30 } }).forEach(printjson);
+
+// Retrieve documents with projection (only 'name' and 'cgpa')
+print("\nStudents with only 'name' and 'cgpa':");
+db.students.find({}, { name: 1, cgpa: 1 }).forEach(printjson);
+
+// 3. Update (Modify)
+
+// Update a single document - Increase cgpa and add a new course
+db.students.updateOne(
+  { name: "Akarsh" },
+  { $set: { cgpa: 9.5 }, $push: { courses: "Data Science" } }
+);
+
+// Update multiple documents - Add a 'status' field to students younger than 30
+db.students.updateMany(
+  { age: { $lt: 30 } },
+  { $set: { status: "young" } }
+);
+
+// 4. Delete (Remove)
+
+// Delete a single document
+db.students.deleteOne({ name: "Ajith" });
+
+// Delete multiple documents where age is less than 25
+db.students.deleteMany({ age: { $lt: 25 } });
+
+// 5. Array Operations
+
+// Push a new course to Akarsh's course array
+db.students.updateOne(
+  { name: "Akarsh" },
+  { $push: { courses: "AI" } }
+);
+
+// Push multiple courses to Akarsh's course array
+db.students.updateOne(
+  { name: "Akarsh" },
+  { $push: { courses: { $each: ["Cloud", "Cyber"] } } }
+);
+
+// Remove a course from Akarsh's course array
+db.students.updateOne(
+  { name: "Akarsh" },
+  { $pull: { courses: "Cyber" } }
+);
+
+// Add a course to Akarsh's course array if it doesn't already exist
+db.students.updateOne(
+  { name: "Akarsh" },
+  { $addToSet: { courses: "Cloud" } }
+);
+
+// 6. Sorting and Finding
+
+// Sort by name in ascending order
+print("\nStudents sorted by name (ascending):");
+db.students.find().sort({ name: 1 }).forEach(printjson);
+
+// Sort by cgpa in descending order
+print("\nStudents sorted by CGPA (descending):");
+db.students.find().sort({ cgpa: -1 }).forEach(printjson);
