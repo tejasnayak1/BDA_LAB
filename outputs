@@ -1,0 +1,24 @@
+hadoop version
+javac -version
+cd desktop
+makdir lab
+makdir lab/input
+makdir lab/bda
+export HADOOP_CLASSPATH=$(hadoop classpath)
+echo $HADOOP_CLASSPATH
+
+start-dfs.sh
+start-yarn.sh
+jps
+
+hadoop fs -mkdir /WordCountProgram
+hadoop fs -mkdir /WordCountProgram/Input
+hadoop fs -put Lab/Input/input.txt /WordCountProgram/Input
+
+cd Lab
+javac -classpath $HADOOP_CLASSPATH -d BDA WordCount.java
+
+jar -cvf WordCount.jar -C BDA .
+
+hadoop jar WordCount.jar WordCount /WordCountProgram/Input/WordCountProgram/Output
+hadoop dfs -cat /WordCountProgram/Output/*  
