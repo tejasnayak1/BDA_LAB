@@ -1,0 +1,59 @@
+Exp 1: Visualize data using basic plotting techniques in Python.
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+
+# 1. Line Plot
+x = np.linspace(0, 10, 100)
+y = np.sin(x)
+
+plt.figure(figsize=(10, 8))
+
+plt.subplot(2, 2, 1) # 2 rows, 2 columns, 1st plot
+plt.plot(x, y, color='blue')
+plt.title('Line Plot of y = sin(x)')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.grid(True)
+
+# 2. Bar Plot
+categories = ['A', 'B', 'C', 'D']
+values = [10, 20, 15, 25]
+
+plt.subplot(2, 2, 2) # 2nd plot
+plt.bar(categories, values, color='green')
+plt.title('Bar Plot')
+plt.xlabel('Category')
+plt.ylabel('Values')
+
+# 3. Histogram
+
+data = np.random.randn(1000)
+
+plt.subplot(2, 2, 3) # 3rd plot
+plt.hist(data, bins=30, edgecolor='black', color='orange')
+plt.title('Histogram of Normally Distributed Data')
+plt.xlabel('Value')
+plt.ylabel('Frequency')
+
+# 4. Scatter Plot
+x_scatter = np.random.rand(50)
+y_scatter = np.random.rand(50)
+
+plt.subplot(2, 2, 4) # 4th plot
+plt.scatter(x_scatter, y_scatter, color='red')
+plt.title('Scatter Plot')
+plt.xlabel('x')
+plt.ylabel('y')
+
+# Adjust layout
+plt.tight_layout()
+
+# Show all plots
+plt.show()
+
+# 5. Seaborn-enhanced Histogram with KDE
+plt.figure(figsize=(6, 4))
+sns.histplot(data, kde=True, color='purple')
+plt.title('Seaborn Histogram with KDE')
+plt.show()
