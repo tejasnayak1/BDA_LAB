@@ -1,0 +1,81 @@
+import java.io.IOException;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+public class EvenOddCount {
+    
+    // Mapper class to process each input number and classify as "Even" or "Odd"
+    public static class EvenOddMapper extends Mapper<Object, Text, Text, IntWritable> {
+        private final static IntWritable one = new IntWritable(1); // For counting
+        private Text evenOdd = new Text(); // To hold "Even" or "Odd" label
+
+        @Override
+        public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+            try {
+                int number = Integer.parseInt(value.toString().trim()); // Parse integer from text
+                if (number % 2 == 0) {
+                    evenOdd.set("Even"); // Set "Even" if the number is even
+                } else {
+                    evenOdd.set("Odd"); // Set "Odd" if the number is odd
+                }
+                context.write(evenOdd, one); // Emit ("Even", 1) or ("Odd", 1)
+            } catch (NumberFormatException e) {
+                // In case the value is not a valid integer, skip it.
+                // This is optional depending on your input data.
+                return;
+            }
+        }
+    }
+
+    // Reducer class to sum up the counts of "Even" and "Odd"
+    public static class EvenOddReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+        private IntWritable result = new IntWritable();
+
+        @Override
+        protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+            int sum = 0;
+            for (IntWritable val : values) {
+                sum += val.get(); // Sum the counts of "Even" or "Odd"
+            }
+            result.set(sum);
+            context.write(key, result); // Emit the total count for "Even" or "Odd"
+        }
+    }
+
+    // Main driver method
+    public static void main(String[] args) throws Exception {
+        if (args.length != 2) {
+            System.err.println("Usage: EvenOddCount <input path> <output path>");
+            System.exit(-1);
+        }
+
+        Configuration conf = new Configuration();
+        Job job = Job.getInstance(conf, "Even Odd Count");
+        job.setJarByClass(EvenOddCount.class);
+
+        // Set Mapper and Reducer classes
+        job.setMapperClass(EvenOddMapper.class);
+        job.setCombinerClass(EvenOddReducer.class); // Optional Combiner to reduce data before the Reducer
+        job.setReducerClass(EvenOddReducer.class);
+
+        // Set output key and value types for Mapper and Reducer
+        job.setMapOutputKeyClass(Text.class);
+        job.setMapOutputValueClass(IntWritable.class);
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(IntWritable.class);
+
+        // Set input and output paths from command-line arguments
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+
+        // Submit job and wait for completion
+        System.exit(job.waitForCompletion(true) ? 0 : 1);
+    }
+}
